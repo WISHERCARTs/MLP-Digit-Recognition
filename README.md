@@ -6,6 +6,8 @@
 ![Streamlit](https://img.shields.io/badge/Streamlit-1.28+-red?logo=streamlit)
 ![scikit-learn](https://img.shields.io/badge/scikit--learn-1.3+-orange)
 
+🔗 **Live Demo:** [wishercarts-mlp-digit-recognition-app-at0kj5.streamlit.app](https://wishercarts-mlp-digit-recognition-app-at0kj5.streamlit.app/)
+
 ## Features
 
 - **วาดตัวเลขด้วยมือ** - Interactive canvas สำหรับวาดตัวเลข
