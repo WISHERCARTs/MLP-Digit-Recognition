@@ -7,9 +7,9 @@ import numpy as np
 from PIL import Image
 import pickle
 import os
-from scipy.io import loadmat
 from sklearn.neural_network import MLPClassifier
 from sklearn.metrics import accuracy_score
+from sklearn.datasets import fetch_openml
 from streamlit_drawable_canvas import st_canvas
 
 # ==================== Page Config ====================
@@ -68,14 +68,15 @@ def load_model():
             model_data = pickle.load(f)
         return model_data['model'], model_data['accuracy']
     else:
-        # Train model ใหม่
-        with st.spinner('🚀 กำลัง Train Model... (ครั้งแรกเท่านั้น)'):
-            mnist_data = loadmat('mnist-original.mat')
-            x = mnist_data['data'].T
-            y = mnist_data['label'][0]
+        # Train model ใหม่ - ใช้ fetch_openml แทน loadmat
+        with st.spinner('🚀 กำลังดาวน์โหลด MNIST และ Train Model... (ครั้งแรกเท่านั้น)'):
+            # ดาวน์โหลด MNIST จาก OpenML
+            mnist = fetch_openml('mnist_784', version=1, as_frame=False)
+            x = mnist.data.astype('float32')
+            y = mnist.target.astype('int')
             
             # Shuffle
-            shuffle_idx = np.random.permutation(70000)
+            shuffle_idx = np.random.permutation(len(x))
             x, y = x[shuffle_idx], y[shuffle_idx]
             
             # Split
