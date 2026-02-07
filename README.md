@@ -8,11 +8,10 @@
 
 ## 🎯 Features
 
-- ✏️ **วาดตัวเลขด้วยมือ** - Interactive canvas สำหรับวาดตัวเลข
-- 📁 **อัปโหลดรูปภาพ** - รองรับไฟล์ PNG, JPG
-- 🧠 **Neural Network** - ใช้ MLP กับ 2 hidden layers (256, 128 neurons)
-- 📊 **แสดง Confidence** - แสดงความมั่นใจในการทำนาย
-- 🎨 **UI สวยงาม** - Modern design with gradient colors
+- **วาดตัวเลขด้วยมือ** - Interactive canvas สำหรับวาดตัวเลข
+- **อัปโหลดรูปภาพ** - รองรับไฟล์ PNG, JPG
+- **Neural Network** - ใช้ MLP กับ 2 hidden layers (256, 128 neurons)
+- **แสดง Confidence** - แสดงความมั่นใจในการทำนาย
 
 ## 🚀 Installation
 
@@ -39,7 +38,7 @@ MLP/
 └── README.md           # Documentation
 ```
 
-## 🧠 How MLP Works
+## How MLP Works
 
 ```
 Input Layer (784 neurons)
@@ -59,7 +58,7 @@ Prediction (0-9)
 - Training: 60,000 images
 - Testing: 10,000 images
 
-## 📈 Model Performance
+## Model Performance
 
 | Metric        | Value        |
 | ------------- | ------------ |
@@ -68,7 +67,7 @@ Prediction (0-9)
 | Neurons       | 256, 128     |
 | Training Time | ~2-3 minutes |
 
-## 🖼️ Screenshots
+## Screenshots
 
 เมื่อรัน app จะได้หน้าเว็บสำหรับ:
 
