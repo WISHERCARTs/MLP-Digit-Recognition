@@ -6,14 +6,14 @@
 ![Streamlit](https://img.shields.io/badge/Streamlit-1.28+-red?logo=streamlit)
 ![scikit-learn](https://img.shields.io/badge/scikit--learn-1.3+-orange)
 
-## 🎯 Features
+## Features
 
 - **วาดตัวเลขด้วยมือ** - Interactive canvas สำหรับวาดตัวเลข
 - **อัปโหลดรูปภาพ** - รองรับไฟล์ PNG, JPG
 - **Neural Network** - ใช้ MLP กับ 2 hidden layers (256, 128 neurons)
 - **แสดง Confidence** - แสดงความมั่นใจในการทำนาย
 
-## 🚀 Installation
+## Installation
 
 ```bash
 # Clone หรือ download โปรเจกต์
@@ -26,7 +26,7 @@ pip install -r requirements.txt
 streamlit run app.py
 ```
 
-## 📂 Project Structure
+## Project Structure
 
 ```
 MLP/
