@@ -1,9 +1,6 @@
 # Dataset (too large for GitHub)
 mnist-original.mat
 
-# Trained model
-mlp_model.pkl
-
 # Python
 __pycache__/
 *.pyc
