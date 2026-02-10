@@ -7,6 +7,7 @@ import numpy as np
 from PIL import Image
 import pickle
 import os
+from scipy import ndimage
 from sklearn.neural_network import MLPClassifier
 from sklearn.metrics import accuracy_score
 from sklearn.datasets import fetch_openml
@@ -72,7 +73,7 @@ def load_model():
         with st.spinner('🚀 กำลังดาวน์โหลด MNIST และ Train Model... (ครั้งแรกเท่านั้น)'):
             # ดาวน์โหลด MNIST จาก OpenML
             mnist = fetch_openml('mnist_784', version=1, as_frame=False)
-            x = mnist.data.astype('float32')
+            x = mnist.data.astype('float32') / 255.0  # Normalize 0-1
             y = mnist.target.astype('int')
             
             # Shuffle
@@ -99,18 +100,78 @@ def load_model():
 
 # ==================== Process Image ====================
 def preprocess_image(image):
-    """แปลงรูปให้เป็น format ที่ model ต้องการ (784 pixels)"""
-    # Convert to grayscale
-    img = image.convert('L')
-    # Resize to 28x28
-    img = img.resize((28, 28))
-    # Convert to numpy array
-    img_array = np.array(img)
-    # Invert colors (MNIST uses white on black)
-    img_array = 255 - img_array
+    """แปลงรูปให้เป็น format ที่ model ต้องการ (784 pixels)
+    - จัดการ RGBA → Grayscale อย่างถูกต้อง
+    - Center ตัวเลขตาม bounding box (เหมือน MNIST)
+    - Normalize ค่า pixel ให้อยู่ 0-1
+    """
+    # Convert RGBA to grayscale properly
+    img_array = np.array(image)
+    
+    if img_array.ndim == 3 and img_array.shape[2] == 4:
+        # Canvas RGBA: ใช้ RGB channels เพื่อดึงเส้นที่วาด
+        # (alpha = 255 ทั้งพื้นและเส้น จึงใช้แยกไม่ได้)
+        # พื้นดำ(0) + เส้นขาว(255) = ตรงกับ MNIST format เลย
+        r = img_array[:, :, 0].astype(np.float32)
+        g = img_array[:, :, 1].astype(np.float32)
+        b = img_array[:, :, 2].astype(np.float32)
+        gray = 0.299 * r + 0.587 * g + 0.114 * b
+    else:
+        # รูปปกติ: convert to grayscale
+        img = image.convert('L')
+        gray = np.array(img, dtype=np.float32)
+        # Invert: MNIST = ขาวบนดำ, รูปปกติ = ดำบนขาว
+        gray = 255.0 - gray
+    
+    # ---- Center digit using bounding box (เหมือนวิธี MNIST) ----
+    # หา bounding box ของตัวเลข
+    threshold = 30
+    coords = np.where(gray > threshold)
+    
+    if len(coords[0]) == 0:
+        # ไม่มีเส้นที่วาด → return blank
+        img_final = np.zeros((28, 28), dtype=np.float32)
+        return img_final.flatten().reshape(1, -1), img_final.astype(np.uint8)
+    
+    # Crop ตัวเลขออกมา
+    top, bottom = coords[0].min(), coords[0].max()
+    left, right = coords[1].min(), coords[1].max()
+    digit = gray[top:bottom+1, left:right+1]
+    
+    # Resize ให้พอดี 20x20 (MNIST มี digit 20x20 อยู่กลางรูป 28x28)
+    h, w = digit.shape
+    if h > w:
+        new_h = 20
+        new_w = max(1, int(w * (20.0 / h)))
+    else:
+        new_w = 20
+        new_h = max(1, int(h * (20.0 / w)))
+    
+    digit_pil = Image.fromarray(digit.astype(np.uint8))
+    digit_resized = digit_pil.resize((new_w, new_h), Image.LANCZOS)
+    digit_resized = np.array(digit_resized, dtype=np.float32)
+    
+    # วางตรงกลางรูป 28x28 (padding 4px รอบๆ)
+    img_28 = np.zeros((28, 28), dtype=np.float32)
+    pad_top = (28 - new_h) // 2
+    pad_left = (28 - new_w) // 2
+    img_28[pad_top:pad_top+new_h, pad_left:pad_left+new_w] = digit_resized
+    
+    # Shift ไปที่ center of mass (เทคนิคเดียวกับ MNIST)
+    cy, cx = ndimage.center_of_mass(img_28)
+    shift_y = 14 - cy
+    shift_x = 14 - cx
+    img_28 = ndimage.shift(img_28, [shift_y, shift_x], mode='constant', cval=0)
+    
+    # Normalize 0-1 (ให้ตรงกับ training data)
+    img_28 = img_28 / 255.0
+    
+    # สำหรับแสดงผล
+    img_display = (img_28 * 255).astype(np.uint8)
+    
     # Flatten to 784
-    img_flat = img_array.flatten().reshape(1, -1)
-    return img_flat, img_array
+    img_flat = img_28.flatten().reshape(1, -1)
+    return img_flat, img_display
 
 # ==================== Main App ====================
 def main():
@@ -145,10 +206,10 @@ def main():
             
             # Drawing canvas
             canvas_result = st_canvas(
-                fill_color="white",
-                stroke_width=20,
-                stroke_color="black",
-                background_color="white",
+                fill_color="rgba(0, 0, 0, 0)",
+                stroke_width=15,
+                stroke_color="white",
+                background_color="#000000",
                 height=280,
                 width=280,
                 drawing_mode="freedraw",

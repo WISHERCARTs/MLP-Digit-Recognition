@@ -32,6 +32,10 @@ mnist = {
 # ==================== 3. เตรียมข้อมูล ====================
 x, y = mnist['data'], mnist['target']
 
+# Normalize: แปลงค่า pixel จาก 0-255 → 0-1
+# ทำให้ model เรียนรู้ได้ดีขึ้น และ confidence สมจริงมากขึ้น
+x = x / 255.0
+
 # Shuffle ข้อมูล: สุ่มลำดับเพื่อไม่ให้โมเดลเรียนรู้ตามลำดับ
 shuffle_idx = np.random.permutation(70000)
 x, y = x[shuffle_idx], y[shuffle_idx]
