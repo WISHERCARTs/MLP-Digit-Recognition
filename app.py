@@ -55,6 +55,7 @@ st.markdown("""
         text-align: center;
         box-shadow: 0 4px 15px rgba(0,0,0,0.1);
     }
+
 </style>
 """, unsafe_allow_html=True)
 
@@ -109,13 +110,13 @@ def preprocess_image(image):
     img_array = np.array(image)
     
     if img_array.ndim == 3 and img_array.shape[2] == 4:
-        # Canvas RGBA: ใช้ RGB channels เพื่อดึงเส้นที่วาด
-        # (alpha = 255 ทั้งพื้นและเส้น จึงใช้แยกไม่ได้)
-        # พื้นดำ(0) + เส้นขาว(255) = ตรงกับ MNIST format เลย
+        # Canvas RGBA: แปลงเป็น grayscale จาก RGB
         r = img_array[:, :, 0].astype(np.float32)
         g = img_array[:, :, 1].astype(np.float32)
         b = img_array[:, :, 2].astype(np.float32)
         gray = 0.299 * r + 0.587 * g + 0.114 * b
+        # Invert: เส้นดำ(0) บนพื้นขาว(255) → เส้นขาว(255) บนพื้นดำ(0) เหมือน MNIST
+        gray = 255.0 - gray
     else:
         # รูปปกติ: convert to grayscale
         img = image.convert('L')
@@ -206,10 +207,10 @@ def main():
             
             # Drawing canvas
             canvas_result = st_canvas(
-                fill_color="rgba(0, 0, 0, 0)",
+                fill_color="white",
                 stroke_width=15,
-                stroke_color="white",
-                background_color="#000000",
+                stroke_color="black",
+                background_color="white",
                 height=280,
                 width=280,
                 drawing_mode="freedraw",
